@@ -348,10 +348,261 @@ function loadLuma_Bendy_Script_Hub()
 	end)
 	local Tab = window:Tab("scripts")
 	Tab:Button("Fly", function()
-	--[[
-	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
-]]
-		loadstring(game:HttpGet("https://pastebin.com/raw/9kTfJ9W2"))();
+	-- Cheesy Fly Gui v4 - FULL YELLOW THEME 🧀💛
+-- Premium cheese overload, instant noclip off, no drift
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CheesyFlyGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = gethui()
+
+-- Main Frame (tall yellow beast)
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 280, 0, 240)
+mainFrame.Position = UDim2.new(0.5, -140, 0.3, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+mainFrame.BackgroundTransparency = 0.1
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = screenGui
+
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+local stroke = Instance.new("UIStroke", mainFrame)
+stroke.Color = Color3.fromRGB(255, 255, 0)  -- bright yellow glow
+stroke.Thickness = 2
+stroke.Transparency = 0.4
+
+-- Title (yellow text)
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -80, 0, 40)
+title.BackgroundTransparency = 1
+title.Text = "Cheesy Fly Gui"
+title.TextColor3 = Color3.fromRGB(255, 255, 0)  -- yellow title
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.Parent = mainFrame
+
+-- Close & Minimize
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.new(1,1,1)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.Parent = mainFrame
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
+
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 30, 0, 30)
+minBtn.Position = UDim2.new(1, -70, 0, 5)
+minBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 50)  -- orange-yellow minimize
+minBtn.Text = "−"
+minBtn.TextColor3 = Color3.new(1,1,1)
+minBtn.Font = Enum.Font.GothamBold
+minBtn.TextSize = 24
+minBtn.Parent = mainFrame
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 8)
+
+-- Speed Box (yellow accents)
+local speedBox = Instance.new("TextBox")
+speedBox.Size = UDim2.new(0.8, 0, 0, 35)
+speedBox.Position = UDim2.new(0.1, 0, 0, 60)
+speedBox.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+speedBox.PlaceholderText = "Fly Speed (default 100)"
+speedBox.Text = "100"
+speedBox.TextColor3 = Color3.fromRGB(255, 255, 0)  -- yellow text
+speedBox.Font = Enum.Font.Gotham
+speedBox.TextSize = 18
+speedBox.Parent = mainFrame
+Instance.new("UICorner", speedBox)
+local speedStroke = Instance.new("UIStroke", speedBox)
+speedStroke.Color = Color3.fromRGB(255, 220, 0)  -- golden yellow stroke
+speedStroke.Thickness = 1
+
+-- Fly Button (yellow when off, green when on)
+local flyBtn = Instance.new("TextButton")
+flyBtn.Size = UDim2.new(0.8, 0, 0, 45)
+flyBtn.Position = UDim2.new(0.1, 0, 0, 110)
+flyBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 0)  -- yellow/orange base
+flyBtn.Text = "Fly [OFF]"
+flyBtn.TextColor3 = Color3.new(1,1,1)
+flyBtn.Font = Enum.Font.GothamBold
+flyBtn.TextSize = 20
+flyBtn.Parent = mainFrame
+Instance.new("UICorner", flyBtn)
+
+-- Noclip Button
+local noclipBtn = Instance.new("TextButton")
+noclipBtn.Size = UDim2.new(0.8, 0, 0, 45)
+noclipBtn.Position = UDim2.new(0.1, 0, 0, 165)
+noclipBtn.BackgroundColor3 = Color3.fromRGB(200, 150, 0)  -- darker yellow
+noclipBtn.Text = "Noclip [OFF]"
+noclipBtn.TextColor3 = Color3.new(1,1,1)
+noclipBtn.Font = Enum.Font.GothamBold
+noclipBtn.TextSize = 20
+noclipBtn.Parent = mainFrame
+Instance.new("UICorner", noclipBtn)
+
+-- Draggable (same)
+local dragging = false
+local dragStart, startPos
+title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+    end
+end)
+title.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+end)
+
+-- Fly vars
+local flying = false
+local noclip = false
+local speed = 100
+local keys = {W = false, A = false, S = false, D = false}
+local bv, bg, char, hum, root
+
+local function startFly()
+    char = player.Character or player.CharacterAdded:Wait()
+    hum = char:WaitForChild("Humanoid")
+    root = char:WaitForChild("HumanoidRootPart")
+    hum.PlatformStand = true
+    
+    bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bv.Velocity = Vector3.new(0,0,0)
+    bv.Parent = root
+    
+    bg = Instance.new("BodyGyro")
+    bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+    bg.P = 15000
+    bg.Parent = root
+end
+
+local function stopFly()
+    if bv then bv:Destroy() bv = nil end
+    if bg then bg:Destroy() bg = nil end
+    if hum then hum.PlatformStand = false end
+end
+
+-- Instant noclip
+local function enableNoclip()
+    char = player.Character or player.CharacterAdded:Wait()
+    for _, part in pairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then part.CanCollide = false end
+    end
+end
+
+local function disableNoclip()
+    if not player.Character then return end
+    char = player.Character
+    for _, part in pairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then part.CanCollide = true end
+    end
+end
+
+-- Buttons
+flyBtn.MouseButton1Click:Connect(function()
+    flying = not flying
+    flyBtn.Text = "Fly [" .. (flying and "ON" or "OFF") .. "]"
+    flyBtn.BackgroundColor3 = flying and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(255, 200, 0)
+    if flying then startFly() else stopFly() end
+end)
+
+noclipBtn.MouseButton1Click:Connect(function()
+    noclip = not noclip
+    noclipBtn.Text = "Noclip [" .. (noclip and "ON" or "OFF") .. "]"
+    noclipBtn.BackgroundColor3 = noclip and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(200, 150, 0)
+    if noclip then enableNoclip() else disableNoclip() end
+end)
+
+speedBox.FocusLost:Connect(function(enter)
+    if enter then
+        local num = tonumber(speedBox.Text)
+        if num and num > 0 then speed = num
+        else speedBox.Text = tostring(speed) end
+    end
+end)
+
+minBtn.MouseButton1Click:Connect(function()
+    if mainFrame.Size.Y.Offset == 240 then
+        TweenService:Create(mainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 40)}):Play()
+    else
+        TweenService:Create(mainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 240)}):Play()
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    stopFly()
+    disableNoclip()
+    screenGui:Destroy()
+end)
+
+-- Movement Loop
+RunService.RenderStepped:Connect(function()
+    if flying and root then
+        local cam = workspace.CurrentCamera
+        local moveX = (keys.A and -1 or 0) + (keys.D and 1 or 0)
+        local moveZ = (keys.W and -1 or 0) + (keys.S and 1 or 0)
+        local moveY = 0
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then moveY = moveY + 1 end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then moveY = moveY - 1 end
+        
+        local hasInput = moveX ~= 0 or moveZ ~= 0 or moveY ~= 0
+        
+        if hasInput then
+            local direction = Vector3.new(moveX, moveY, moveZ)
+            local worldDir = (cam.CFrame * direction) - cam.CFrame.Position
+            bv.Velocity = worldDir.Unit * speed
+        else
+            bv.Velocity = Vector3.new(0, 0, 0)
+        end
+        
+        bg.CFrame = cam.CFrame
+    end
+    
+    if noclip and player.Character then
+        char = player.Character
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end
+end)
+
+-- Keys
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    local kc = input.KeyCode
+    if kc == Enum.KeyCode.W then keys.W = true
+    elseif kc == Enum.KeyCode.A then keys.A = true
+    elseif kc == Enum.KeyCode.S then keys.S = true
+    elseif kc == Enum.KeyCode.D then keys.D = true end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    local kc = input.KeyCode
+    if kc == Enum.KeyCode.W then keys.W = false
+    elseif kc == Enum.KeyCode.A then keys.A = false
+    elseif kc == Enum.KeyCode.S then keys.S = false
+    elseif kc == Enum.KeyCode.D then keys.D = false end
+end)
 	end)
 	Tab:Button("coca cola X pro", function()
 --[[
@@ -433,7 +684,7 @@ function loadLuma_Bendy_Script_Hub()
 		local ScreenGui = Instance.new("ScreenGui")
 		ScreenGui.Name = "SuperRingPartsGUI"
 		ScreenGui.ResetOnSpawn = false
-		ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+		ScreenGui.Parent = gethui()
 
 		local MainFrame = Instance.new("Frame")
 		MainFrame.Size = UDim2.new(0, 300, 0, 600) -- Increased height for new features
