@@ -93,9 +93,36 @@ main = window:Tab("teleports")
     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-268.386414, 60.8938217, -430.386017, 0.504252732, -1.42263232e-08, 0.863556147, 3.26849048e-10, 1, 1.62832592e-08, -0.863556147, -7.92862576e-09, 0.504252732)
   end) 
   main = window:Tab("other")
+  main:Button("esp", function()
+  -- Function to add highlight safely
+local function addHighlight(model)
+    if model:FindFirstChild("Humanoid") and not model:FindFirstChild("Highlight") then
+        local HH = Instance.new("Highlight")
+        HH.Parent = model
+    end
+end
+
+-- Add highlights to existing characters
+for _, v in pairs(workspace:GetDescendants()) do
+    if v:IsA("Model") then
+        addHighlight(v)
+    elseif v:IsA("BasePart") then
+        v.CastShadow = false -- disable shadows
+    end
+end
+
+-- Add highlights to new characters
+workspace.ChildAdded:Connect(function(child)
+    if child:IsA("Model") then
+        addHighlight(child)
+    elseif child:IsA("BasePart") then
+        child.CastShadow = false
+    end
+end)
+  end)
        main:Button("connect network (joke that glitches listerners)", function()
 game:GetService("GuiService"):SetGameplayPausedNotificationEnabled(false)
-        -- LocalScript inside StarterPlayerScripts
+-- LocalScript inside StarterPlayerScripts
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
@@ -135,7 +162,7 @@ local function makeFly(part)
                     root.CanCollide = false
                     firetouchinterest(root, player.Character.HumanoidRootPart, 2)
                     root.CanCollide = true
-            
+                    root.CanTouch = false
                    for _, descendant in pairs(model:GetDescendants()) do
             if descendant:IsA("BasePart") then
                 
@@ -149,10 +176,8 @@ local function makeFly(part)
         -- Non-Humanoid model: break joints in every part
         for _, descendant in pairs(model:GetDescendants()) do
             if descendant:IsA("BasePart") then
-                
-                descendant.CanCollide = true
-                elseif descendant:IsA("Weld") then
-                print("W") -- d:BreakJoints()
+                descendant:BreakJoints()
+                descendant.CanCollide = false
             end
         end
 
