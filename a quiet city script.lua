@@ -8,41 +8,8 @@ local function addHit(model)
         HH.Parent = model
     
 end
-main:Button("die.", function()
--- Script to disable CanTouch on all character parts
--- Place this in a LocalScript inside StarterPlayerScripts
-
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
--- Function to disable CanTouch
-local function disableCanTouch(character)
-    
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-            part.Name = "Goghg"
-            part.Size = 3
-            Part.Position = 11111
-            Part:ClearAllChildren()
-            wait(0.1)
-                part:Destroy()
-            end
-        end
-         -- small delay to prevent lag
-    
-end
-
--- Run when character spawns
-player.CharacterAdded:Connect(function(character)
-    disableCanTouch(character)
-    character:BreakJoints()
-    game:Shutdown()
-end)
-
--- If character already exists
-if player.Character then
-    disableCanTouch(player.Character)
-end
+main:Button("shutdown (ONLY ON EMERGENCY)", function()
+game:Shutdown()
 
 end)
 main:Button("tool esp", function()
@@ -53,7 +20,14 @@ for _, v in pairs(workspace:GetDescendants()) do
        print("no")
     end
 end
-end)
+for _, v in pairs(workspace:GetDescendants()) do
+    if v.Name ==  "Money" then
+        addHit(v)
+    elseif v:IsA("BasePart") then
+       print("no")
+    end
+end
+end) 
 main:Button("day", function()
 local Lighting = game:GetService("Lighting")
 
@@ -65,7 +39,7 @@ Lighting.Brightness = 3 -- more natural brightness
 task.spawn(function()
     while true do
         Lighting.ClockTime = 12
-        Lighting.Brightness = 3
+        Lighting.Brightness = 10
         task.wait(0.5)
     end
 end)
@@ -99,4 +73,26 @@ end)
   end)
 main:Button("no wood", function()
 workspace.Builds:Destroy()
-  end)
+  end)-- PineTree1
+  
+  main:Button("no pinetree", function()
+for i,v in pairs(workspace:GetDescendants()) do
+if v:IsA("Instance") and v.Name == "PineTree1"then
+v:Destroy()
+end
+end
+  end) -- 
+main = window:Tab("teleports")
+    main:Button("tp to shop", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-637.577087, 5.38460922, -427.407379, 0.992321908, 0.0286850296, -0.120309822, -0.0278511997, 0.999575019, 0.00860681757, 0.120505579, -0.00518996082, 0.992699087)
+  end) 
+      main:Button("tp to sewer", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-125.306435, -27.6061745, -337.008331, -0.979692638, 4.58601015e-08, 0.200505152, 5.43161285e-08, 1, 3.66724286e-08, -0.200505152, 4.68183714e-08, -0.979692638)
+  end) 
+        main:Button("tp to tall house", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-268.386414, 60.8938217, -430.386017, 0.504252732, -1.42263232e-08, 0.863556147, 3.26849048e-10, 1, 1.62832592e-08, -0.863556147, -7.92862576e-09, 0.504252732)
+  end) 
+  main = window:Tab("speed")
+       main:Button("speed 200", function()
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 200
+  end) 
