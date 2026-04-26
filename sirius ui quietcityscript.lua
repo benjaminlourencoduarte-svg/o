@@ -20,13 +20,23 @@ game.Players.PlayerAdded:Connect(function(player)
         print(player.Name .. " is NOT in the group " .. GROUP_NAME)
     end
 end)
+-- Download the image
+local _, result = pcall(function()
+    writefile("axe.png", game:HttpGet("https://tse2.mm.bing.net/th/id/OIP.W8Zpprqfq0a7-cILvyUBfwAAAA?w=256&h=256&rs=1&pid=ImgDetMain&o=7&rm=3"))
+end)
 
+local getcustomasset = getcustomasset or getsynasset
+local img = getcustomasset("axe.png")
+local _, result = pcall(function()
+    writefile("QuestionMark.png", game:HttpGet("https://png.pngtree.com/png-clipart/20191121/original/pngtree-vector-question-mark-icon-png-image_5159031.jpg"))
+end)
+local img1 = getcustomasset("QuestionMark.png")
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Quety city - luma hub",
+   Name = "Quiet city - luma hub",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-   LoadingTitle = "pro",
+   LoadingTitle = "pro quiet city ",
    LoadingSubtitle = "by benjamin",
    ShowText = "quiet city", -- for mobile users to unhide Rayfield, change if you'd like
    Theme = "Bloom", -- Check https://docs.sirius.menu/rayfield/configuration/themes
@@ -63,7 +73,7 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- OP Tab
-local OP = Window:CreateTab("OP", 4483362458)
+local OP = Window:CreateTab("OP", img)
 local function addHit(target)
    if not target:FindFirstChild("Highlight") then
       local HH = Instance.new("Highlight")
@@ -249,7 +259,7 @@ Teleports:CreateButton({
 })
 
 -- Other Tab
-local Other = Window:CreateTab("Other", 4483362458)
+local Other = Window:CreateTab("Other", img1)
 
 Other:CreateButton({
    Name = "Anti Lag",
@@ -424,4 +434,11 @@ Other:CreateButton({
 	end)
 
    end
+}) 
+-- notify Rayfield
+Rayfield:Notify({
+   Title = "loaded",
+   Content = "the hub has loaded",
+   Duration = 6.5,
+   Image = 4483362458,
 })
