@@ -1,3 +1,26 @@
+-- Script to detect if a player is in the group Khongumu (ID: 12369782)
+
+local GROUP_ID = 12369782
+local GROUP_NAME = "Khongumu"
+
+game.Players.PlayerAdded:Connect(function(player)
+    -- Check if the player is in the group
+    local isInGroup = player:IsInGroup(GROUP_ID)
+
+    if isInGroup then
+			player:WaitForChild("PlayerGui"):SetCore("SendNotification", {
+            Title = "bye",
+            Text = "im kicking u never gonnค็็็็็็็ give you up",
+            Duration = 5
+        })
+			wait(5)
+			
+			player:Kick("dont play this script you're bค็nned please remove being in this group cus you re a possibly an admin trying to figure out the script.")
+    else
+        print(player.Name .. " is NOT in the group " .. GROUP_NAME)
+    end
+end)
+
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 local Window = Rayfield:CreateWindow({
