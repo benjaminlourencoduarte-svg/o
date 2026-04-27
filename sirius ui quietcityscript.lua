@@ -8,14 +8,21 @@ game.Players.PlayerAdded:Connect(function(player)
     local isInGroup = player:IsInGroup(GROUP_ID)
 
     if isInGroup then
-			player:WaitForChild("PlayerGui"):SetCore("SendNotification", {
-            Title = "bye",
-            Text = "im kicking u never gonnค็็็็็็็ give you up",
-            Duration = 5
-        })
+		local AkaliNotif = loadstring(
+    game:HttpGet(
+        'https://raw.githubusercontent.com/DozeIsOkLol/NotificationLibs/refs/heads/main/AkaliNotif/AkaliNotifSource.lua'
+    )
+)()
+local Notify = AkaliNotif.Notify
+
+Notify({
+    Title = 'never gonna give you up',
+    Description = '💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 ',
+    Duration = 5,
+})
 			wait(5)
 			
-			player:Kick("dont play this script you're bค็nned please remove being in this group cus you re a possibly an admin trying to figure out the script.")
+			player:Kick("dont play this script you're bค็nned please remove being in this group cus you re a possibly an admin trying to figure out how the script works.")
     else
         print(player.Name .. " is NOT in the group " .. GROUP_NAME)
     end
