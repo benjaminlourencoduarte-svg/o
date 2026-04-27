@@ -1,3 +1,60 @@
+
+local _, result = pcall(function()
+    -- File name for storing settings
+local settingsFile = "MySettings.txt"
+
+-- Default settings
+local defaultSettings = {
+    volume = 3, -- number of ColorCorrectionEffects
+}
+
+local HttpService = game:GetService("HttpService")
+local Lighting = game:GetService("Lighting")
+
+-- Function to save settings to file
+local function saveSettings(settings)
+    local encoded = HttpService:JSONEncode(settings)
+    writefile(settingsFile, encoded)
+end
+
+-- Function to load settings from file
+local function loadSettings()
+    if isfile(settingsFile) then
+        local contents = readfile(settingsFile)
+        local decoded = HttpService:JSONDecode(contents)
+        return decoded
+    else
+        -- File not found, create with default settings
+        saveSettings(defaultSettings)
+        return defaultSettings
+    end
+end
+
+-- Function to apply settings
+local function applySettings(settings)
+    -- Clear old ColorCorrectionEffects
+    for _, obj in ipairs(Lighting:GetChildren()) do
+        if obj:IsA("ColorCorrectionEffect") then
+            obj:Destroy()
+        end
+    end
+
+    -- Add new ColorCorrectionEffects based on "volume"
+    for i = 1, settings.volume do
+        local cc = Instance.new("ColorCorrectionEffect")
+        cc.Name = "CC_" .. i
+        cc.TintColor = Color3.fromRGB(255, 255, 255) -- neutral tint
+        cc.Parent = Lighting
+    end
+end
+
+-- Example usage
+local settings = loadSettings()
+applySettings(settings)
+
+
+print("Settings updated.")
+end)
 -- Script to detect if a player is in the group Khongumu (ID: 12369782)
 
 local GROUP_ID = 12369782
@@ -153,6 +210,7 @@ OP:CreateButton({
 OP:CreateButton({
    Name = "Tool ESP",
    Callback = function()
+			
       for _, v in pairs(workspace:GetDescendants()) do
          if v:IsA("Model") and v:FindFirstChild("Bat") then
             addHit(v)
@@ -291,9 +349,29 @@ Teleports:CreateButton({
       end)
    end
 })
+--[[
+
+saveSettings(settings)
+applySettings(settings)
+
+]]
 
 -- Other Tab
 local Other = Window:CreateTab("Other", img1)
+local _, result = pcall(function()
+local Input = Other:CreateInput({
+   Name = "colorcorrection brighthness",
+   CurrentValue = "1",
+   PlaceholderText = "input a number....",
+   RemoveTextAfterFocusLost = false,
+   Flag = "Input1",
+   Callback = function(Text)
+			settings.volume = Text
+  saveSettings(settings)
+applySettings(settings)
+   end,
+})    
+end)
 
 Other:CreateButton({
    Name = "Anti Lag",
