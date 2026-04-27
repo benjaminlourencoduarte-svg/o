@@ -1,3 +1,22 @@
+-- Function to generate a random hex string
+local function randomHex(length)
+    local hexChars = "0123456789abcdef"
+    local result = ""
+    for i = 1, length do
+        local randIndex = math.random(1, #hexChars)
+        result = result .. string.sub(hexChars, randIndex, randIndex)
+    end
+    return result
+end
+
+-- Function to generate the key
+local function generateKey()
+    -- 16 hex characters (like your example)
+    local hexPart = randomHex(16)
+    return "Token-" .. hexPart .. "😉"
+end
+key = generateKey()
+-- Example usage
 
 local _, result = pcall(function()
     -- File name for storing settings
@@ -15,8 +34,9 @@ local Lighting = game:GetService("Lighting")
 local function saveSettings(settings)
     local encoded = HttpService:JSONEncode(settings)
     writefile(settingsFile, encoded)
+			
+	
 end
-
 -- Function to load settings from file
 local function loadSettings()
     if isfile(settingsFile) then
@@ -550,7 +570,7 @@ Other:CreateButton({
 -- notify Rayfield
 Rayfield:Notify({
    Title = "loaded",
-   Content = "the hub has loaded",
+   Content = "the hub has loaded, "..key.. "\n" .. " here is the latest token",
    Duration = 6.5,
    Image = 4483362458,
 })
