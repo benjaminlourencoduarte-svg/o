@@ -1,5 +1,5 @@
--- Function to generate a random hex string
-local function randomHex(length)
+-- !PATCHED!
+[[ local function randomHex(length)
     local hexChars = "0123456789abcdef"
     local result = ""
     for i = 1, length do
@@ -572,3 +572,4 @@ Rayfield:Notify({
    Duration = 6.5,
    Image = 4483362458,
 })
+]]
