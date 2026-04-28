@@ -291,7 +291,23 @@ if Rayfield then
           end
        end
     })
-
+OP:CreateButton({
+       Name = "godmode",
+       Callback = function()
+          local function FeGodMode()
+	game.Players.LocalPlayer.Character.Humanoid.Name = 1
+	local l = game.Players.LocalPlayer.Character["1"]:Clone()
+	l.Parent = game.Players.LocalPlayer.Character
+	l.Name = "Humanoid"
+	game.Players.LocalPlayer.Character.Animate.Disabled = true
+	wait()
+	game.Players.LocalPlayer.Character.Animate.Disabled = false
+	game.Players.LocalPlayer.Character["1"]:Destroy()
+	game.Workspace.CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character
+end
+      FeGodMode()          
+       end
+    })
     OP:CreateButton({
        Name = "No PineTree",
        Callback = function()
