@@ -387,6 +387,75 @@ end
           end
        end
     })
+	
+	Teleports:CreateButton({
+       Name = "money autofarm oversimple",
+       Callback = function()
+local player = game.Players.LocalPlayer
+local char = player and player.Character
+if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+local root = char.HumanoidRootPart
+local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+local PathfindingService = game:GetService("PathfindingService")
+
+task.spawn(function()
+    while true do
+        local nearestMoney
+        local shortestDist = math.huge
+
+        -- Find nearest money part
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("BasePart") and v.Name == "Money" then
+                local dist = (v.Position - root.Position).Magnitude
+                if dist < shortestDist then
+                    shortestDist = dist
+                    nearestMoney = v
+                end
+            end
+        end
+
+        if nearestMoney then
+            -- Put player underground while idle
+            root.CFrame = CFrame.new(root.Position.X, -50, root.Position.Z)
+
+            -- Pathfinding wrapped in pcall
+            local ok, err = pcall(function()
+                local path = PathfindingService:CreatePath()
+                path:ComputeAsync(root.Position, nearestMoney.Position)
+                if path.Status == Enum.PathStatus.Complete then
+                    path:MoveTo(char)
+                    humanoid.MoveToFinished:Wait()
+                end
+            end)
+            if not ok then
+                warn("Pathfinding failed: " .. tostring(err))
+            end
+
+            -- Teleport into the money part
+            root.CFrame = CFrame.new(nearestMoney.Position)
+
+            -- Safely try to fire the prompt
+            local prompt = nearestMoney:FindFirstChildWhichIsA("ProximityPrompt")
+            if prompt then
+                local ok, err = pcall(function()
+                    fireproximityprompt(prompt)
+                end)
+                if not ok then
+                    warn("Prompt firing failed: " .. tostring(err))
+                end
+            end
+
+            -- Return underground again
+            root.CFrame = CFrame.new(root.Position.X, -50, root.Position.Z)
+        end
+
+        task.wait(1)
+    end
+end)
+
+       end
+    })
 
     Teleports:CreateButton({
        Name = "Auto Collect Nearest Money",
@@ -419,7 +488,7 @@ end
                    end
                 end
 
-                task.wait(1)
+                task.wait(0.01)
              end
           end)
        end
