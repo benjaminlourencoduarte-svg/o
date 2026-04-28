@@ -82,95 +82,47 @@ local GROUP_NAME = "Khongumu"
 --[[
 um banthingy i quess..?!
 ]]
+
 local _, result = pcall(function()
-player = game.Players.LocalPlayer
-local isInGroup = player:IsInGroup(GROUP_ID)
-
-    if isInGroup then
-		local AkaliNotif = loadstring(
-    game:HttpGet(
-        'https://raw.githubusercontent.com/DozeIsOkLol/NotificationLibs/refs/heads/main/AkaliNotif/AkaliNotifSource.lua'
-    )
-)()
-local Notify = AkaliNotif.Notify
-
-Notify({
-    Title = 'never gonna give you up',
-    Description = '💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 ',
-    Duration = 5,
-}) 
-			player.Character:Destroy()
-			-- Blur everything in the game
-local Lighting = game:GetService("Lighting")
-
--- Create a BlurEffect
-local blur = Instance.new("BlurEffect")
-blur.Size = 277667658768768678768765687 -- higher values = stronger blur
-blur.Parent = Lighting
-			spawn(function ()
-					while wait(0.01) do
-						-- Add a Bloom effect to the game
-local Lighting = game:GetService("Lighting")
-
--- Create a BloomEffect
-local bloom = Instance.new("BloomEffect")
-bloom.Intensity = 7676547646576745876787686520 -- strength of the bloom glow
-bloom.Size = 246754676      -- controls spread of the glow
-bloom.Threshold = 0.0 -- controls brightness cutoff
-bloom.Parent = Lighting
-
-					end
-				end)
-
-			wait(3)
-			player:Kick("dont play this script you're bค็nned please remove being in this group cus you re a possibly an admin trying to figure out how the script works.")
-end)
-game.Players.PlayerAdded:Connect(function(player)
-    -- Check if the player is in the group
+    local player = game.Players.LocalPlayer
     local isInGroup = player:IsInGroup(GROUP_ID)
 
     if isInGroup then
-		local AkaliNotif = loadstring(
-    game:HttpGet(
-        'https://raw.githubusercontent.com/DozeIsOkLol/NotificationLibs/refs/heads/main/AkaliNotif/AkaliNotifSource.lua'
-    )
-)()
-local Notify = AkaliNotif.Notify
+        local AkaliNotif = loadstring(
+            game:HttpGet(
+                'https://raw.githubusercontent.com/DozeIsOkLol/NotificationLibs/refs/heads/main/AkaliNotif/AkaliNotifSource.lua'
+            )
+        )()
+        local Notify = AkaliNotif.Notify
 
-Notify({
-    Title = 'never gonna give you up',
-    Description = '💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 ',
-    Duration = 5,
-}) 
-			player.Character:Destroy()
-			-- Blur everything in the game
-local Lighting = game:GetService("Lighting")
+        Notify({
+            Title = 'never gonna give you up',
+            Description = '💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 ',
+            Duration = 5,
+        }) 
 
--- Create a BlurEffect
-local blur = Instance.new("BlurEffect")
-blur.Size = 277667658768768678768765687 -- higher values = stronger blur
-blur.Parent = Lighting
-			spawn(function ()
-					while wait(0.01) do
-						-- Add a Bloom effect to the game
-local Lighting = game:GetService("Lighting")
+        player.Character:Destroy()
 
--- Create a BloomEffect
-local bloom = Instance.new("BloomEffect")
-bloom.Intensity = 7676547646576745876787686520 -- strength of the bloom glow
-bloom.Size = 246754676      -- controls spread of the glow
-bloom.Threshold = 0.0 -- controls brightness cutoff
-bloom.Parent = Lighting
+        local Lighting = game:GetService("Lighting")
+        local blur = Instance.new("BlurEffect")
+        blur.Size = 100 -- keep this reasonable
+        blur.Parent = Lighting
 
-					end
-				end)
+        spawn(function()
+            while wait(0.01) do
+                local bloom = Instance.new("BloomEffect")
+                bloom.Intensity = 5
+                bloom.Size = 10
+                bloom.Threshold = 0.0
+                bloom.Parent = Lighting
+            end
+        end)
 
-			wait(3)
-			player:Kick("dont play this script you're bค็nned please remove being in this group cus you re a possibly an admin trying to figure out how the script works.")
-    else
-        print(player.Name .. " is NOT in the group " .. GROUP_NAME)
+        wait(3)
+        player:Kick("You are banned from this script.")
     end
-end)
+end) -- closes the pcall correctly
+
 -- Download the image
 local _, result = pcall(function()
     writefile("axe.png", game:HttpGet("https://tse2.mm.bing.net/th/id/OIP.W8Zpprqfq0a7-cILvyUBfwAAAA?w=256&h=256&rs=1&pid=ImgDetMain&o=7&rm=3"))
