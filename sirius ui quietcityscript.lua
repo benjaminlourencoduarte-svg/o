@@ -73,8 +73,7 @@ local settings = loadSettings()
 applySettings(settings)
 
 
-print("Settings updated.")
-end)
+
 -- Script to detect if a player is in the group Khongumu (ID: 12369782)
 
 local GROUP_ID = 12369782
