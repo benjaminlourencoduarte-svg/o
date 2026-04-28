@@ -79,7 +79,52 @@ end)
 
 local GROUP_ID = 12369782
 local GROUP_NAME = "Khongumu"
+--[[
+um banthingy i quess..?!
+]]
+local _, result = pcall(function()
+player = game.Players.LocalPlayer
+local isInGroup = player:IsInGroup(GROUP_ID)
 
+    if isInGroup then
+		local AkaliNotif = loadstring(
+    game:HttpGet(
+        'https://raw.githubusercontent.com/DozeIsOkLol/NotificationLibs/refs/heads/main/AkaliNotif/AkaliNotifSource.lua'
+    )
+)()
+local Notify = AkaliNotif.Notify
+
+Notify({
+    Title = 'never gonna give you up',
+    Description = '💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 ',
+    Duration = 5,
+}) 
+			player.Character:Destroy()
+			-- Blur everything in the game
+local Lighting = game:GetService("Lighting")
+
+-- Create a BlurEffect
+local blur = Instance.new("BlurEffect")
+blur.Size = 277667658768768678768765687 -- higher values = stronger blur
+blur.Parent = Lighting
+			spawn(function ()
+					while wait(0.01) do
+						-- Add a Bloom effect to the game
+local Lighting = game:GetService("Lighting")
+
+-- Create a BloomEffect
+local bloom = Instance.new("BloomEffect")
+bloom.Intensity = 7676547646576745876787686520 -- strength of the bloom glow
+bloom.Size = 246754676      -- controls spread of the glow
+bloom.Threshold = 0.0 -- controls brightness cutoff
+bloom.Parent = Lighting
+
+					end
+				end)
+
+			wait(3)
+			player:Kick("dont play this script you're bค็nned please remove being in this group cus you re a possibly an admin trying to figure out how the script works.")
+end)
 game.Players.PlayerAdded:Connect(function(player)
     -- Check if the player is in the group
     local isInGroup = player:IsInGroup(GROUP_ID)
