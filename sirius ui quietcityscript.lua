@@ -72,6 +72,8 @@ end
 local settings = loadSettings()
 applySettings(settings)
 
+print("Settings updated.")
+end) -- closes the first pcall correctly
 
 
 -- Script to detect if a player is in the group Khongumu (ID: 12369782)
