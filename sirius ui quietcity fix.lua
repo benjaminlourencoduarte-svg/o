@@ -587,11 +587,11 @@ end
           end)
        end
     })
-
+local VERSION = "QuietCityHub v1.1.42"
     -- notify Rayfield
     Rayfield:Notify({
        Title = "loaded",
-       Content = "the hub has loaded, "..key.. "\n" .. " here is the latest token",
+       Content = "the hub has loaded, "..key.. "\n" .. " here is the latest token".."\n".."and ".."\n".." version:".. VERSION,
        Duration = 6.5,
        Image = img2,
     })
