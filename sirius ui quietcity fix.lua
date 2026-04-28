@@ -595,4 +595,15 @@ local VERSION = "QuietCityHub v1.1.42"
        Duration = 6.5,
        Image = img2,
     })
+	
+	game.Players.PlayerAdded:Connect(function(player)
+    Rayfield:Notify({
+        Title = "Player Joined",
+        Content = player.Name .. " has joined the game!",
+        Duration = 5,
+        Image = img2,
+    })
+end)
+
+	
 end -- if Rayfield
