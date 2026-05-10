@@ -135,16 +135,13 @@ main_A:Button("anti teleport freeze", function()
 	end
 end)
 main_A:Button("anti kick", function()
-	while wait(0.5) do
-		local lp = game.Players.LocalPlayer.Kick
-		
-		local oldLp
-		oldLp = hookfunction(lp, newcclosure(function(...)
-			return print("Attempt To kick has been blocked")
-		end))
-		
-	end
+    local oldKick
+    oldKick = hookfunction(game.Players.LocalPlayer.Kick, newcclosure(function(...)
+        print("Attempt to kick has been blocked")
+        return nil
+    end))
 end)
+
 --[[
 more tash
 ]]
