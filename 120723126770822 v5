@@ -1,0 +1,587 @@
+--[[
+ .____                                .__           ___.    
+   |    |     __ __   _____  _____      |  |__   __ __\_ |__  
+   |    |    |  |  \ /     \ \__  \     |  |  \ |  |  \| __ \ 
+   |    |___ |  |  /|  Y Y  \ / __ \_   |   Y  \|  |  /| \_\ \
+   |_______ \|____/ |__|_|  /(____  /   |___|  /|____/ |___  /
+           \/             \/      \/         \/            \/ 
+]]
+repeat wait() until game:IsLoaded() == true
+local https = game:GetService("HttpService")
+
+
+-- Load UI library safely
+local lib
+do
+	local ok, result = pcall(function()
+		local code = game:HttpGet("https://raw.githubusercontent.com/benjaminlourencoduarte-svg/mixauilib/refs/heads/main/mixa.lua")
+		return loadstring(code)()
+	end)
+	if not ok then
+		warn("UI library failed to load:", result)
+		-- Minimal fallback UI object with same API surface used below
+		lib = {}
+		function lib:CreateWindow(title)
+			return {
+				Tab = function(_, name)
+					return {
+						Button = function(_, btnName, fn)
+							print(("Fallback UI: Button created - %s"):format(btnName))
+						end,
+						Label = function() end
+					}
+				end
+			}
+		end
+	else
+		lib = result
+	end
+end
+
+local window = lib:CreateWindow("Ants Simple Small World 2 | luma_hub")
+local pid = game.PlaceId
+
+-- Safe notify wrapper
+function notify(title, msg)
+	local ok, err = pcall(function()
+		game.StarterGui:SetCore("SendNotification", {
+			Title = title,
+			Text = msg,
+			Duration = 5
+		})
+	end)
+	if not ok then
+		warn("Notify failed:", err)
+	end
+end
+
+if pid ~= 120723126770822 then
+	notify("LumaHub - error", "Detected different PlaceId. Join PlaceId 120723126770822 (Ants Simple Small World 2).")
+	notify("LumaHub - Debug", "Teleporting to correct place in 3 seconds...")
+	wait(3)
+	local TeleportService = game:GetService("TeleportService")
+	local player = game.Players.LocalPlayer
+	local err,ok = pcall(function()
+		TeleportService:Teleport(120723126770822, player)
+	end)
+	if err then
+		notify("luma - error", "failed to teleport to correct place.")
+		logWarn("failed")
+		game:GetService("CoreGui").UILibrary:Destroy()
+	else
+		logDebug("teleport success")
+	end
+end
+
+-- Use getgenv for persistent globals
+local G = (getgenv and getgenv()) or _G
+
+-- Debug logger
+G.Luma_DebugLog = G.Luma_DebugLog or {}
+local DebugLog = G.Luma_DebugLog
+function logDebug(...)
+	local msg = table.concat({...}, " ")
+	table.insert(DebugLog, 1, os.date("%X") .. " - " .. msg)
+	if #DebugLog > 300 then table.remove(DebugLog) end
+	print("[LumaHub DEBUG]", msg)
+end
+function logWarn(msg)
+	warn("[LumaHub - Warn] "..msg)
+end
+logWarn("THIS HUB HAS BUGS you can break and sometimes you die then cant spawn at another ant team and need to rejoin")
+-- OP tab --------------------------------------------------------------------
+local main = window:Tab("op")
+
+-- Auto-eat
+local autoEat = false
+local eatThread
+
+local function autoEatLoop()
+	while autoEat do
+		task.wait(0.1)
+		local foodFolder = workspace:FindFirstChild("LiveFood")
+		if not foodFolder then
+			logDebug("LiveFood not found; stopping autoEat.")
+			break
+		end
+
+		for _, remote in pairs(foodFolder:GetDescendants()) do
+			if remote:IsA("RemoteEvent") then
+				pcall(function()
+					remote:FireServer()
+					remote:FireServer(game.Players.LocalPlayer)
+				end)
+			end
+		end
+	end
+end
+
+main:Button("toggle auto eat", function()
+	autoEat = not autoEat
+	logDebug("AutoEat toggled:", tostring(autoEat))
+	if autoEat then
+		if not eatThread or coroutine.status(eatThread) == "dead" then
+			eatThread = coroutine.create(autoEatLoop)
+			coroutine.resume(eatThread)
+		end
+		notify("AutoEat", "Enabled")
+	else
+		notify("AutoEat", "Disabled")
+	end
+end)
+
+-- Food ESP
+local function foodESP()
+	local foodFolder = workspace:FindFirstChild("LiveFood")
+	if not foodFolder then
+		notify("Food ESP", "No LiveFood folder found.")
+		logWarn("Food Esp", "LiveFood folder not found.")
+		return
+	end
+
+	for _, item in pairs(foodFolder:GetDescendants()) do
+		if item:IsA("BasePart") then
+			if not item:FindFirstChild("FoodESP") then
+				local highlight = Instance.new("Highlight")
+				highlight.Name = "FoodESP"
+				highlight.FillColor = Color3.fromRGB(0, 255, 0)
+				highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
+				highlight.FillTransparency = 0.5
+				highlight.OutlineTransparency = 0
+				highlight.Parent = item
+			end
+		end
+	end
+	logDebug("Food ESP applied.")
+	notify("Food ESP", "Applied highlights to LiveFood parts.")
+end
+
+main:Button("food ESP", function()
+	pcall(foodESP)
+	logDebug("toggled food")
+	logWarn("this may break the eating and team joining functions on the game")
+end)
+
+-- Grab / ungrab tools
+main:Button("grab all tools", function()
+	local player = game.Players.LocalPlayer
+	local bp = player:FindFirstChild("Backpack")
+	if not bp then return notify("Grab Tools", "Backpack not found.") end
+	for _, tool in pairs(bp:GetDescendants()) do
+		if tool:IsA("Tool") then
+			pcall(function() tool.Parent = player.Character end)
+		end
+	end
+	logDebug("Grabbed tools to character.")
+	notify("Tools", "Grabbed tools to character.")
+end)
+
+main:Button("ungrab tools", function()
+	local player = game.Players.LocalPlayer
+	local bp = player:FindFirstChild("Backpack")
+	if not bp then return notify("Ungrab Tools", "Backpack not found.") end
+	for _, tool in pairs(player.Character:GetDescendants()) do
+		if tool:IsA("Tool") then
+			pcall(function() tool.Parent = bp end)
+		end
+	end
+	logDebug("Returned tools to backpack.")
+	notify("Tools", "Returned tools to backpack.")
+end)
+
+-- Bring food (physics-based)
+local function bringFood()
+	local lp = game.Players.LocalPlayer
+	sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+	local char = lp.Character
+	if not char then return notify("Bring Food", "Character not found.") end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return notify("Bring Food", "HumanoidRootPart not found.") end
+
+	local foodFolder = workspace:FindFirstChild("LiveFood")
+	if not foodFolder then return notify("Bring Food", "No LiveFood folder found.") end
+
+	for _, item in pairs(foodFolder:GetDescendants()) do
+		if item:IsA("BasePart") and not item.Anchored then
+			local old = item:FindFirstChild("FoodBringBV")
+			if old then old:Destroy() end
+
+			local bv = Instance.new("BodyVelocity")
+			bv.Name = "FoodBringBV"
+			bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+			local success, dir = pcall(function()
+				return (hrp.Position - item.Position).Unit
+			end)
+			if success and dir then
+				bv.Velocity = dir * 100
+			else
+				bv.Velocity = Vector3.new(0, 0, 0)
+			end
+			bv.Parent = item
+			game:GetService("Debris"):AddItem(bv, 1)
+		end
+	end
+	logDebug("bringFood executed.")
+	notify("Bring Food", "Attempted to bring nearby food.")
+end
+function a()
+	sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+	function fireUp(prt)
+		prt.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+
+		local bv = Instance.new("BodyVelocity")
+		bv.Name = https:GenerateGUID(true)
+		bv.MaxForce = Vector3.new(100009999999999999990, -999919999999999999900000, -1009999999000)
+		bv.Velocity = Vector3.new(100009999999999999990, -99991867558769999999999999900000, -1009999999000)
+		prt.Velocity = bv.Velocity
+		bv.Parent = prt
+	end
+	logWarn("This mey Fling your player too and it will make the game harder to find food without it flinging you or dissapearing")
+	local foodFolder = workspace:FindFirstChild("LiveFood")
+	for i,unanchored in pairs(workspace:GetDescendants()) do
+		if unanchored:IsA("BasePart") and not unanchored.Anchored  and unanchored:IsDescendantOf(foodFolder) then
+			fireUp(unanchored)
+		end
+	end
+end
+main:Button("bring food", function()
+	pcall(bringFood)
+end)
+
+-- When glitched tab ---------------------------------------------------------
+local main_A = window:Tab("when glitched")
+
+main_A:Button("rejoin", function()
+	local TeleportService = game:GetService("TeleportService")
+	local player = game.Players.LocalPlayer
+	pcall(function()
+		TeleportService:Teleport(game.PlaceId, player)
+	end)
+	logDebug("Rejoin requested.")
+	notify("Rejoin", "Teleport requested.")
+end)
+
+main_A:Button("anti teleport freeze", function()
+	spawn(function()
+		local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+		if not hrp then return notify("Anti Freeze", "HumanoidRootPart not found.") end
+		local t0 = tick()
+		while tick() - t0 < 10 do
+			hrp.Anchored = false
+			task.wait(0.5)
+		end
+		logDebug("Anti teleport freeze ran for 10s.")
+		notify("Anti Freeze", "Ran for 10 seconds.")
+	end)
+end)
+
+-- Safe demonstration hooks using getgenv
+main_A:Button("safe hook hub (toggle print)", function()
+	if not G.__luma_original_print then
+		G.__luma_original_print = print
+		print = function(...)
+			G.__luma_original_print("[HOOKED PRINT]", ...)
+		end
+		notify("Hook Hub", "print() hooked. Press again to restore.")
+		logDebug("print hooked via getgenv.")
+	else
+		print = G.__luma_original_print
+		G.__luma_original_print = nil
+		notify("Hook Hub", "print() restored.")
+		logDebug("print restored via getgenv.")
+	end
+end)
+
+main_A:Button("safe hook hub (toggle math.random)", function()
+	if not G.__luma_original_random then
+		G.__luma_original_random = math.random
+		math.random = function(...)
+			local r = G.__luma_original_random(...)
+			print("[HOOKED RANDOM] ->", r)
+			return r
+		end
+		notify("Hook Hub", "math.random hooked. Press again to restore.")
+		logDebug("math.random hooked via getgenv.")
+	else
+		math.random = G.__luma_original_random
+		G.__luma_original_random = nil
+		notify("Hook Hub", "math.random restored.")
+		logDebug("math.random restored via getgenv.")
+	end
+end)
+
+-- Speed tab -----------------------------------------------------------------
+local main_B = window:Tab("speed")
+
+local function setWalkSpeed(speed)
+	local player = game.Players.LocalPlayer
+	local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+	if humanoid then
+		humanoid.WalkSpeed = speed
+		logDebug("WalkSpeed set to", speed)
+		notify("WalkSpeed", "Set to " .. tostring(speed))
+	else
+		notify("WalkSpeed", "Humanoid not found.")
+	end
+end
+
+main_B:Button("fast walk", function() setWalkSpeed(19) end)
+main_B:Button("slow walk", function() setWalkSpeed(6) end)
+main_B:Button("normal walk", function() setWalkSpeed(16) end)
+
+main_B:Button("bypass kick", function()
+	notify("Critical error", "The Following Script Has Been Detected By Anticheats. CODE:"..https:GenerateGUID(true))
+	logDebug("whywhy")
+end)
+
+-- Environment checks (safe)
+pcall(function()
+	if getgc then
+		for _, v in next, getgc(true) do
+			if typeof(v) == "table" and rawget(v, "Detected") and typeof(rawget(v, "Detected")) == "function" then
+				logDebug("Adonis-like anti-cheat detected in environment.")
+				notify("Debug", "Adonis-like anti-cheat detected in environment.")
+				break
+			end
+		end
+	end
+end)
+function openconsole()
+	local startergui = game:GetService("StarterGui")
+	startergui:SetCore("DevConsoleVisible", true)
+end
+-- Debug tab -----------------------------------------------------------------
+local debugTab = window:Tab("debug")
+debugTab:Label("Debugging tools")
+debugTab:Separator()
+debugTab:Button("Show last 10 logs (console)", function()
+	for i = 1, math.min(10, #DebugLog) do
+		print(DebugLog[i])
+		openconsole()
+	end
+end)
+
+debugTab:Button("Clear logs", function()
+	DebugLog = {}
+	notify("Debug", "Logs cleared.")
+	logDebug("Logs cleared by user.")
+end)
+debugTab:Button("reset", function()
+	local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+	if humanoid then
+		if replicatesignal then
+			replicatesignal(humanoid.ServerBreakJoints)
+		else
+			notify("err","Where is replicatesignal")
+		end
+		local old = workspace.FallenPartsDestroyHeight
+		workspace.FallenPartsDestroyHeight = 99e9
+		humanoid.Parent.Head:Destroy()
+		wait(0.1)
+		game.Players.LocalPlayer.Character:BreakJoints()
+		humanoid.Health = 0
+		wait(0.3)
+		workspace.FallenPartsDestroyHeight = old
+		humanoid:Destroy()
+		notify("Reset", "Character reset.")
+		logDebug("Character reset by user.")
+
+	else
+		notify("Reset", "No character found.")
+		logWarn("Player character not found.")
+	end
+end)
+
+debugTab:Button("Show player info", function()
+	local player = game.Players.LocalPlayer
+	local char = player.Character
+	if char then
+		local humanoid = char:FindFirstChild("Humanoid")
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		logDebug("Player Info:",
+			"WalkSpeed=" .. tostring(humanoid and humanoid.WalkSpeed),
+			"Health=" .. tostring(humanoid and humanoid.Health),
+			"Position=" .. tostring(hrp and hrp.Position)
+		)
+	else
+		notify("Debug", "Character not found.")
+		logWarn("Player character not found.")
+	end
+end)
+local ToolTab = window:Tab("Trolling")
+ToolTab:Button("hide food", function()
+	pcall(a)
+	logDebug(" Oh no ! the food is dissapearing and flimging pepole")
+end)
+ToolTab:Button("delete unanchored parts tool", function()
+	local lp = game.Players.LocalPlayer
+	local mouse = lp:GetMouse()
+
+	local ft = Instance.new("Tool")
+	ft.Name = "delete"
+	ft.RequiresHandle = false
+	ft.Parent = lp.Backpack
+	ft.Activated:Connect(function()
+		local obj = mouse.Target
+		if obj:IsA("BasePart") or obj:IsA("Part") or obj:IsA("MeshPart") or obj:IsA("CornerWedgePart") or obj:IsA("TrussPart") or obj:IsA("WedgePart") then
+			if not obj.Anchored then
+				local bambam = Instance.new("BodyAngularVelocity")
+				bambam.Name = https:GenerateGUID(true)
+				bambam.Parent = obj
+				bambam.AngularVelocity = Vector3.new(99999999999999999999999,9999999999999999999999,999999999999999999999999)
+				bambam.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
+				bambam.P = math.huge
+			end
+		end
+	end)
+end)
+ToolTab:Button("npc abuser gui", function()
+	local npc={}
+	function npc:BugAll()
+		sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+		for i,npec in pairs(workspace:GetChildren()) do
+			if npec:IsA("Model") and npec:FindFirstChild("Humanoid") and npec:FindFirstChild("HumanoidRootPart") then
+				local bv=Instance.new("BodyVelocity",npec.HumanoidRootPart)
+				bv.MaxForce=Vector3.new(100000,100000,100000)
+				bv.Velocity=Vector3.new(0,0,0)
+				bv.Name=https:GenerateGUID(true)
+				local humanoid=npec:FindFirstChild("Humanoid")
+
+				humanoid.RootPart.Position = Vector3.new(1000, 1000, 1000)
+			end
+		end
+	end
+	function npc:Noanims()
+		for i,npc in pairs(workspace:GetChildren()) do
+			if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc:FindFirstChild("HumanoidRootPart") then
+				if npc:FindFirstChild("Animate") then
+					npc.Animate:Destroy()
+				end
+			end
+		end
+	end
+	function npc:drag()
+		for i,npc in pairs(workspace:GetChildren()) do
+			if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc:FindFirstChild("HumanoidRootPart") then
+				local htp = npc:FindFirstChild("HumanoidRootPart")
+				local drag = Instance.new("DragDetector", htp)
+				drag.MaxTorque = 99999
+				drag.Name = https:GenerateGUID(true)
+			end
+		end
+	end
+	local mixaUiLIB = loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/WfTHwCvXlhE0NZAm/raw"))()
+	lib = mixaUiLIB
+	local window = lib:CreateWindow("npc exploiter by lumahub")
+
+	-- OP tab
+	main = window:Tab("abuser")
+	main:Button("break npcs", function()
+		npc:BugAll()
+	end)
+	main:Button("no animations for npcs", function()
+		npc:Noanims()
+	end)
+	main:Button("Npcs: drag", function()
+		npc:drag()
+	end)
+end)
+function hide()
+	for i,invisibleparts in pairs(workspace:GetDescendants()) do
+		if invisibleparts:IsA("BasePart") and invisibleparts.Transparency == 1 then
+			function findhumanoid()
+				if invisibleparts.Parent:FindFirstChild("Humanoid") then
+					return invisibleparts.Parent.Humanoid
+				end
+			end
+			if findhumanoid() then
+				return
+			end
+			invisibleparts.CanCollide = false
+			invisibleparts.CanTouch = false
+			invisibleparts.CanQuery = false
+		end
+	end
+
+end
+ToolTab:Button("hide parts", function()
+	hide()
+end)
+ToolTab:Button("invisible", function()
+	local function invisible()
+		local lp=game.Players.LocalPlayer.Character
+		local hrp = lp:WaitForChild("HumanoidRootPart")
+		wait(0.1)
+		hrp.Anchored = true
+		hrp.CFrame = CFrame.new(0,1000,0)
+		local clone = hrp:Clone()
+		clone.Anchored = false
+		clone.Parent = lp
+		clone.Name = "HumanoidRootPart"
+		wait(0.1)
+		hrp:Destroy()
+	end
+end)
+local bringheads = false
+r = game:GetService("ReplicatedStorage")
+function fireallremoteeventsonpart(p)
+	for i,v in pairs(r:GetChildren()) do
+		if v:IsA("RemoteEvent") then
+			v:FireServer(p)
+		end
+	end
+end
+function attackall()
+	for i,player in pairs(game.Players:GetPlayers()) do
+		local head=player.Character.Head
+		local lphrp=game.Players.LocalPlayer.Character.HumanoidRootPart
+		if player ~= game.Players.LocalPlayer then
+			while bringheads == true do
+				fireallremoteeventsonpart(head)
+				head.Anchored = true
+				head.CFrame = lphrp.CFrame * CFrame.new(0,0,-5)
+				wait(0.01)
+			end
+		end
+	end
+end
+
+ToolTab:Button("bring everyone's heads", function()
+	bringheads = not bringheads
+	pcall(attackall)
+end)
+local by = window:Tab("anticheat bypasser")
+by:Button("test anticheat", function()
+	setWalkSpeed(126)
+end)
+-- 
+by:Button("anticheat bypasser", function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/adamowaissi22-boop/Axom/refs/heads/main/AntiCheat%20Bypasser%20by%20axom%20script"))()
+end)
+by:Button("anti cheat deleter (broken)", function()
+	local hahaha = game:GetService("ReplicatedStorage").anit
+	hahaha:Destroy()
+	local lel = game:GetService("ReplicatedStorage")["Bullet Settings"].Anti
+	lel:Destroy()
+end)
+by:Image(865864258, nil, nil, nil, "add")
+
+-- Finalize
+logDebug("LumaHub initialized (getgenv).")
+notify("LumaHub", "Initialized. Some exploit features removed because they broke the hub and gave me line 1 errors.")
+print([[
+luma hub.
+
+Sub to ADSKer.Official on YouTube
+]])
+local BetterPrint = loadstring(game:HttpGet("https://raw.githubusercontent.com/AndreyTheDev/betterprint/main/source.lua"))()
+
+BetterPrint:Init()
+BetterPrint.printimage("rbxassetid://12656773607", 200, 200)
+wait(3)
+local u = "Budgie Console"
+local tc3 = Color3.new(0.223529, 0.533333, 1)
+game:GetService("CoreGui").DevConsoleMaster.DevConsoleWindow.DevConsoleUI.TopBar.WindowTitle.Text = u
+game:GetService("CoreGui").DevConsoleMaster.DevConsoleWindow.DevConsoleUI.TopBar.WindowTitle.TextColor3 = tc3
+game:GetService("CoreGui").DevConsoleMaster.DevConsoleWindow.DevConsoleUI.TopBar.WindowTitle.Font = Enum.Font.Code
+game:GetService("CoreGui").DevConsoleMaster.DevConsoleWindow.DevConsoleUI.TopBar.WindowTitle.TextSize = 20
